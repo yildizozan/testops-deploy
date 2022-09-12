@@ -1,0 +1,33 @@
+isolateComponents: true
+
+ingress:
+  enabled: true
+  className: nginx
+  hostname: selenium-testops-dev.turknet.net.tr
+
+chromeNode:
+  extraVolumeMounts:
+    - name: selenium-assets
+      mountPath: "/opt/selenium/assets"
+  extraVolumes:
+    - name: selenium-assets
+      persistentVolumeClaim:
+        claimName: selenium-assets
+
+firefoxNode:
+  extraVolumeMounts:
+    - name: selenium-assets
+      mountPath: "/opt/selenium/assets"
+  extraVolumes:
+    - name: selenium-assets
+      persistentVolumeClaim:
+        claimName: selenium-assets
+
+edgeNode:
+  extraVolumeMounts:
+    - name: selenium-assets
+      mountPath: "/opt/selenium/assets"
+  extraVolumes:
+    - name: selenium-assets
+      persistentVolumeClaim:
+        claimName: selenium-assets
