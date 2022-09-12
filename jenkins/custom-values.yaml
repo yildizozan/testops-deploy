@@ -1,0 +1,236 @@
+controller:
+  #image: "registry.turknet.net.tr/test/jenkins"
+  image: "yildizozan/jenkins"
+  tag: "2.346.3-jdk11-20220912.2"
+  #tag: "2.346.3-jdk11"
+  installPlugins: false
+
+  imagePullSecretName: reg-creds
+  
+  jenkinsUrl: jenkins-testops-dev.turknet.net.tr
+  jenkinsAdminEmail: devops@turk.net
+
+  ingress:
+    enabled: true
+    hostName: jenkins-testops-dev.turknet.net.tr
+    ingressClassName: nginx
+
+  JCasC:
+    enabled: true
+    defaultConfig: false
+    configScripts:
+      jenkins: |
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - usernamePassword:
+                  id: "allure-token"
+                  password: "{AQAAABAAAACA75z1idxjOtq5Jq+4lSsBrjZYzHIyz84szY+3n3LUecx8zm4yg5QIlgBzQOXkjP07rnFghAyez2uobcZLWuBddEm7ljvzoeX2lCGyXmh369o6WURzIeU6oDeQsauUacjyrJv0muh2bJhCDvbXJ4olqkapCNHi+AmdTMg+eZyEEupX8pWam20jgRmr5pcJJCCw}"
+                  scope: GLOBAL
+                  username: "allure-token"
+              - usernamePassword:
+                  id: "azure-devops-feed-token"
+                  password: "{AQAAABAAAACApjub5EfRuW3MrkODJCl4wEOUdtaoPc5LYRsHy+EL7JmF+ULv9SXc9QLhrWlB9clpfx2KyY8EySnoQ6D4zhmA9MhTxIS9/YV9n/aZ6pIszLutbvo2azz6insG3i7oY+3IiIBtBnslae99LjsN0hGUP1IyJOMI6+9aZsVXl8L+yO5/bq3D/cOCI2fIZSJz7Op/}"
+                  scope: GLOBAL
+                  username: "azure-devops-feed-token"
+              - usernamePassword:
+                  id: "azure-devops-git-token"
+                  password: "{AQAAABAAAACAk36vefVm8Kuj1ZFJzWGD8y+FXL4dZBgToxU7dyKMUlAcgjO0iTj5kTscqRADn6aFs+5rGEqjbIxDjuyGYtCYrJ4K/PiKefwgvOl0xr2g94oy+IZ+FY4SZ4AQ7b/N5+s6whUQaNBYnPxobLyH/9w9ZvmlHWuOEThBIAxxTcCfCyZy3Fr7x+PZHqWKDM/ZXLSS}"
+                  scope: GLOBAL
+                  username: "azure-devops-git-token"
+        jenkins:
+          agentProtocols:
+          - "JNLP4-connect"
+          - "Ping"
+          authorizationStrategy:
+            loggedInUsersCanDoAnything:
+              allowAnonymousRead: false
+          clouds:
+          - kubernetes:
+              containerCap: 10
+              containerCapStr: "10"
+              jenkinsTunnel: "jenkins-agent.default.svc.cluster.local:50000"
+              jenkinsUrl: "http://jenkins.default.svc.cluster.local:8080"
+              name: "kubernetes"
+              namespace: "default"
+              podLabels:
+              - key: "jenkins/jenkins-jenkins-agent"
+                value: "true"
+              serverUrl: "https://kubernetes.default"
+              templates:
+              - containers:
+                - args: "^${computer.jnlpmac} ^${computer.name}"
+                  envVars:
+                  - envVar:
+                      key: "JENKINS_URL"
+                      value: "http://jenkins.default.svc.cluster.local:8080/"
+                  image: "jenkins/inbound-agent:4.11.2-4"
+                  name: "jnlp"
+                  resourceLimitCpu: "512m"
+                  resourceLimitMemory: "512Mi"
+                  resourceRequestCpu: "512m"
+                  resourceRequestMemory: "512Mi"
+                  workingDir: "/home/jenkins/agent"
+                id: "be62f2fe67fa3e83c0157edaa53417c084c49a8aa88c3702e3ca1cc8df3fcbe2"
+                label: "jenkins-jenkins-agent"
+                name: "default"
+                namespace: "default"
+                nodeUsageMode: "NORMAL"
+                podRetention: "never"
+                serviceAccount: "default"
+                slaveConnectTimeout: 100
+                slaveConnectTimeoutStr: "100"
+                yamlMergeStrategy: "override"
+          crumbIssuer:
+            standard:
+              excludeClientIPFromCrumb: true
+          disableRememberMe: false
+          labelAtoms:
+          - name: "built-in"
+          - name: "jenkins-jenkins-agent"
+          markupFormatter: "plainText"
+          mode: NORMAL
+          myViewsTabBar: "standard"
+          numExecutors: 0
+          primaryView:
+            all:
+              name: "all"
+          projectNamingStrategy: "standard"
+          quietPeriod: 5
+          remotingSecurity:
+            enabled: true
+          scmCheckoutRetryCount: 0
+          securityRealm:
+            local:
+              allowsSignup: false
+              enableCaptcha: false
+              users:
+              - id: "admin"
+                name: "Jenkins Admin"
+                properties:
+                - "apiToken"
+                - "mailer"
+                - "myView"
+                - preferredProvider:
+                    providerId: "default"
+                - "timezone"
+          slaveAgentPort: 50000
+          updateCenter:
+            sites:
+            - id: "default"
+              url: "https://updates.jenkins.io/update-center.json"
+          views:
+          - all:
+              name: "all"
+          viewsTabBar: "standard"
+        globalCredentialsConfiguration:
+          configuration:
+            providerFilter: "none"
+            typeFilter: "none"
+        security:
+          apiToken:
+            creationOfLegacyTokenEnabled: false
+            tokenGenerationOnCreationEnabled: false
+            usageStatisticsEnabled: true
+          gitHostKeyVerificationConfiguration:
+            sshHostKeyVerificationStrategy: "knownHostsFileVerificationStrategy"
+          sSHD:
+            port: -1
+        unclassified:
+          allurePluginConfig:
+            serverConfigs:
+            - credentialsId: "allure-token"
+              delayBeforeUploadFinish: 20
+              enableSslValidation: false
+              endpoint: "http://testops-dev.turknet.net.tr"
+              id: "allure"
+          buildDiscarders:
+            configuredBuildDiscarders:
+            - "jobBuildDiscarder"
+          fingerprints:
+            fingerprintCleanupDisabled: false
+            storage: "file"
+          gitSCM:
+            addGitTagAction: false
+            allowSecondFetch: false
+            createAccountBasedOnEmail: false
+            disableGitToolChooser: false
+            hideCredentials: false
+            showEntireCommitSummaryInChanges: false
+            useExistingAccountWithSameEmail: false
+          globalConfigFiles:
+            configs:
+            - globalMavenSettings:
+                comment: "Global settings"
+                content: |-
+                  <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                                https://maven.apache.org/xsd/settings-1.0.0.xsd">
+                    <servers>
+
+                      <server>
+                        <id>turknet-core</id>
+                        <username>turknet-it</username>
+                        <password>us2y2lyh3aw2lcjemdkq67xgc6dmwsrn2xlzqqw73wpocumfmw7q</password>
+                      </server>
+                      <server>
+                        <id>turknet-test</id>
+                        <username>turknet-it</username>
+                        <password>us2y2lyh3aw2lcjemdkq67xgc6dmwsrn2xlzqqw73wpocumfmw7q</password>
+                      </server>
+                    </servers>
+                  </settings>
+                id: "azure-devops-feed-token"
+                isReplaceAll: true
+                name: "AzureDevopsFeedToken"
+                providerId: "org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig"
+          junitTestResultStorage:
+            storage: "file"
+          location:
+            adminAddress: "devops@turk.net"
+            url: "http://jenkins-testops-dev.turknet.net.tr/"
+          mailer:
+            charset: "UTF-8"
+            useSsl: false
+            useTls: false
+          mavenModuleSet:
+            localRepository: "default"
+          pollSCM:
+            pollingThreadCount: 10
+        tool:
+          git:
+            installations:
+            - home: "git"
+              name: "Default"
+          maven:
+            installations:
+            - name: "maven"
+              properties:
+              - installSource:
+                  installers:
+                  - maven:
+                      id: "3.8.6"
+          mavenGlobalConfig:
+            globalSettingsProvider: "standard"
+            settingsProvider: "standard"
+          pipelineMaven:
+            triggerDownstreamUponResultAborted: false
+            triggerDownstreamUponResultFailure: false
+            triggerDownstreamUponResultNotBuilt: false
+            triggerDownstreamUponResultSuccess: true
+            triggerDownstreamUponResultUnstable: false
+
+
+agent:
+  podName: ozan
+  volumes:
+    - type: PVC
+      claimName: selenium-assets
+      mountPath: /assets
+      readOnly: false
+  # workspaceVolume:
+  #   type: PVC
+  #   claimName: selenium-assets
+  #   readOnly: false
